@@ -1,15 +1,12 @@
 import { Heading } from '@chakra-ui/react';
-import Link from 'next/link';
 import Layout from '../components/Layout';
+import SubjectList from '../components/SubjectList';
 
 const IndexPage = () => (
-  <Layout title="Home | Next.js + TypeScript Example">
+  <Layout title="PodCodar Meetups - votação">
     <Heading>🗳 PodCodar Meetup - votes</Heading>
-    <p>
-      <Link href="/about">
-        <a>About</a>
-      </Link>
-    </p>
+
+    <SubjectList />
   </Layout>
 );
 

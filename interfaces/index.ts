@@ -8,3 +8,7 @@ export type User = {
   id: number;
   name: string;
 };
+
+export interface Submittable {
+  onSubmit?: () => void;
+}

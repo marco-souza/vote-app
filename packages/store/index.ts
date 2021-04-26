@@ -5,6 +5,7 @@ import {
   PayloadAction,
 } from '@reduxjs/toolkit';
 import { Subject, VoteOptions } from '#/interfaces';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 
 const subjectsAdapter = createEntityAdapter<Subject>({
   // Assume IDs are stored in a field other than `subject.id`
@@ -18,9 +19,18 @@ interface VoteSubjectPayload {
   side: VoteOptions;
 }
 
+let initialState = subjectsAdapter.getInitialState();
+
+// reload previous state
+const storeFile = './store.json';
+if (existsSync(storeFile)) {
+  const { subjects } = JSON.parse(readFileSync(storeFile).toString());
+  if (subjects != null) initialState = subjects;
+}
+
 const subjectSlice = createSlice({
   name: 'subjects',
-  initialState: subjectsAdapter.getInitialState(),
+  initialState,
   reducers: {
     // Can pass adapter functions directly as case reducers.  Because we're passing this
     // as a value, `createSlice` will auto-generate the `subjectAdded` action type / creator
@@ -29,7 +39,6 @@ const subjectSlice = createSlice({
       // Or, call them as "mutating" helpers in a case reducer
       const { selectAll } = subjectsAdapter.getSelectors();
       const voteIncr = action.payload.side === 'down' ? -1 : 1;
-      console.log(voteIncr);
       const newSubjects = selectAll(state).map((sub) => ({
         ...sub,
         votes: sub.id === action.payload.id ? sub.votes + voteIncr : sub.votes,
@@ -43,6 +52,11 @@ export const store = configureStore({
   reducer: {
     subjects: subjectSlice.reducer,
   },
+});
+
+store.subscribe(() => {
+  // persist on change
+  writeFileSync(storeFile, JSON.stringify(store.getState()));
 });
 
 type RootState = ReturnType<typeof store.getState>;

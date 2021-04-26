@@ -12,3 +12,11 @@ export type User = {
 export interface Submittable {
   onSubmit?: () => void;
 }
+
+export type VoteOptions = null | 'up' | 'down';
+
+export interface Subject {
+  id: number;
+  text: string;
+  votes: number;
+}

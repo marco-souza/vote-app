@@ -17,7 +17,7 @@ const handler = (_req: NextApiRequest, res: NextApiResponse) => {
       case 'POST':
         store.dispatch(
           subjectActions.voteSubject({
-            id: Number(subjectId),
+            id: subjectId,
             side: vote,
           }),
         );

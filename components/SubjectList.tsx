@@ -84,8 +84,8 @@ function SubjectListTable() {
         </Tr>
       </Thead>
       <Tbody>
-        {subjects.map(({ text, votes, vote, voted }) => (
-          <Tr key={text}>
+        {subjects.map(({ id, text, votes, vote, voted }) => (
+          <Tr key={id}>
             <Td>
               <p>{text}</p>
               <Button

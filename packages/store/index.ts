@@ -15,7 +15,7 @@ const subjectsAdapter = createEntityAdapter<Subject>({
 });
 
 interface VoteSubjectPayload {
-  id: number;
+  id: string;
   side: VoteOptions;
 }
 

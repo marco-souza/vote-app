@@ -16,7 +16,7 @@ export interface Submittable {
 export type VoteOptions = null | 'up' | 'down';
 
 export interface Subject {
-  id: number;
+  id: string;
   text: string;
   votes: number;
 }

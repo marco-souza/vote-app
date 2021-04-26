@@ -68,7 +68,6 @@ function SubjectListInput({ onSubmit }: Props) {
 
 function SubjectListTable() {
   const { subjects } = useSubjectListStates();
-  console.log(subjects);
   if (subjects.length === 0)
     return (
       <Text textAlign="center">

@@ -1,14 +1,15 @@
-import React, { ReactNode } from 'react'
-import Link from 'next/link'
-import Head from 'next/head'
+import React, { ReactNode } from 'react';
+import Link from 'next/link';
+import Head from 'next/head';
+import { Container } from '@chakra-ui/layout';
 
 type Props = {
-  children?: ReactNode
-  title?: string
-}
+  children?: ReactNode;
+  title?: string;
+};
 
 const Layout = ({ children, title = 'This is the default title' }: Props) => (
-  <div>
+  <Container>
     <Head>
       <title>{title}</title>
       <meta charSet="utf-8" />
@@ -35,7 +36,7 @@ const Layout = ({ children, title = 'This is the default title' }: Props) => (
       <hr />
       <span>I'm here to stay (Footer)</span>
     </footer>
-  </div>
-)
+  </Container>
+);
 
-export default Layout
+export default Layout;

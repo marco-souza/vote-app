@@ -1,17 +1,14 @@
+import { Subject, VoteOptions } from '#/interfaces';
 import {
   createContext,
   ReactNode,
-  useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
 
-type VoteOptions = null | 'up' | 'down';
-
-interface SubjectItem {
-  text: string;
-  votes: number;
+interface SubjectItem extends Subject {
   voted: VoteOptions;
   vote: (side: VoteOptions) => void;
 }
@@ -42,61 +39,57 @@ interface Props {
   readonly children: ReactNode;
 }
 
+const addSubject = async (text: string): Promise<SubjectItem[]> => {
+  await fetch('/api/subject', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ text }),
+  });
+  const subjects = await updateSubjects();
+  return subjects;
+};
+
+const updateSubjects = async (): Promise<SubjectItem[]> => {
+  const res = await fetch('/api/subject');
+  const subjectsRaw: Subject[] = await res.json();
+
+  return subjectsRaw.map((sub) => ({
+    ...sub,
+    voted: null, // check local storage
+    vote: (side) =>
+      fetch(`/api/subject/${sub.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ vote: side }),
+      }),
+  }));
+};
+
 export default function SubjectListProvider({ children }: Props) {
   const [subjects, setSubjects] = useState<SubjectItem[]>([]);
 
-  const states: SubjectListState = {
-    subjects,
-  };
-
-  const voteItem = useCallback(
-    (position: number, side: VoteOptions) => {
-      if (side == null) return;
-      const item = subjects[position];
-      if (item == null) return;
-
-      const vote = side === 'up' ? 1 : -1;
-      setSubjects(
-        subjects.map((item, index) => {
-          if (index !== position) return item;
-          if (item.voted != null) return item;
-          return {
-            ...item,
-            voted: side,
-            votes: item.votes + vote,
-          };
-        }),
-      );
-    },
-    [subjects],
-  );
-
   const methods: SubjectListMethods = useMemo(
     () => ({
-      addItem: (text) =>
-        setSubjects(
-          [
-            {
-              text,
-              voted: null,
-              votes: 0,
-            },
-            ...subjects,
-          ].map(
-            // Add vote function
-            (item, index): SubjectItem => ({
-              ...item,
-              vote: (side) => voteItem(index, side),
-            }),
-          ),
-        ),
-      updateList: () => {}, // load async
+      addItem: (text) => addSubject(text).then(setSubjects),
+      updateList: () => updateSubjects().then(setSubjects),
     }),
-    [setSubjects, subjects],
+    [],
   );
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      updateSubjects().then(setSubjects);
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
-    <SubjectListStates.Provider value={states}>
+    <SubjectListStates.Provider value={{ subjects }}>
       <SubjectListMethods.Provider value={methods}>
         {children}
       </SubjectListMethods.Provider>

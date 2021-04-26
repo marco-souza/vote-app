@@ -1,17 +1,31 @@
+import SubjectListProvider, {
+  useSubjectListMethods,
+  useSubjectListStates,
+} from '@packages/features/subject-list-context';
 import { Button } from '@chakra-ui/button';
-import { CheckIcon, CloseIcon } from '@chakra-ui/icons';
+import { AddIcon, CheckIcon, CloseIcon, MinusIcon } from '@chakra-ui/icons';
 import { Input, InputGroup, InputRightElement } from '@chakra-ui/input';
-import { Stack } from '@chakra-ui/layout';
+import { Text, Stack } from '@chakra-ui/layout';
 import { useState } from 'react';
 import { Submittable } from '../interfaces';
+import {
+  Table,
+  TableCaption,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from '@chakra-ui/table';
 
 interface Props extends Submittable {}
 
 function SubjectListInput({ onSubmit }: Props) {
+  const { addItem } = useSubjectListMethods();
   const [inputValue, setInputValue] = useState('');
   const handleSubmit = () => {
-    alert(inputValue);
     setInputValue('');
+    addItem(inputValue);
     onSubmit?.();
   };
   const handleCancel = () => setInputValue('');
@@ -52,11 +66,63 @@ function SubjectListInput({ onSubmit }: Props) {
   );
 }
 
+function SubjectListTable() {
+  const { subjects } = useSubjectListStates();
+  console.log(subjects);
+  if (subjects.length === 0)
+    return (
+      <Text textAlign="center">
+        😅 Oops, nenhuma tema foi sugerido ainda...
+      </Text>
+    );
+  return (
+    <Table variant="simple">
+      <TableCaption>Sugestões de temas - Meetups PodCodar</TableCaption>
+      <Thead>
+        <Tr>
+          <Th>Tema</Th>
+          <Th isNumeric>Votes</Th>
+        </Tr>
+      </Thead>
+      <Tbody>
+        {subjects.map(({ text, votes, vote, voted }) => (
+          <Tr key={text}>
+            <Td>
+              <p>{text}</p>
+              <Button
+                size="xs"
+                colorScheme="teal"
+                variant="ghost"
+                disabled={voted != null}
+                onClick={() => vote('up')}
+              >
+                <AddIcon fontSize="0.5rem" />
+              </Button>
+              <Button
+                size="xs"
+                colorScheme="red"
+                variant="ghost"
+                disabled={voted != null}
+                onClick={() => vote('down')}
+              >
+                <MinusIcon fontSize="0.5rem" />
+              </Button>
+            </Td>
+            <Td isNumeric>{votes} votes</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  );
+}
+
 function SubjectList() {
   return (
-    <div>
+    <SubjectListProvider>
       <SubjectListInput />
-    </div>
+
+      <SubjectListTable />
+    </SubjectListProvider>
   );
 }
 
